@@ -92,13 +92,10 @@ def _send_via_smtp(
     msg['To'] = f'{to_name} <{to_email}>'
     msg.attach(MIMEText(html_body, 'html', 'utf-8'))
 
-    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=30) as server:
-        server.ehlo()
-        server.starttls()
+    with smtplib.SMTP_SSL(settings.SMTP_HOST, 465, timeout=30) as server:
         server.ehlo()
         server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
         server.sendmail(settings.SENDER_EMAIL, [to_email], msg.as_string())
-
 
 # ---------------------------------------------------------------------------
 # Public: send_email_with_retry (learner reminder)
