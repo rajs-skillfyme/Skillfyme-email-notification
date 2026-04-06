@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Skillfyme Admin Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f5f9; color: #1e293b; font-size: 14px; }
+
+    nav { background: #4f46e5; color: #fff; padding: 0 32px; display: flex; align-items: center; height: 56px; gap: 16px; }
+    nav h1 { font-size: 18px; font-weight: 700; flex: 1; }
+    nav .badge { background: #22c55e; color: #fff; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+    nav .badge.warn { background: #ef4444; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 24px; }
+    .card h2 { font-size: 15px; font-weight: 700; color: #4f46e5; margin-bottom: 18px; border-bottom: 2px solid #e0e7ff; padding-bottom: 10px; }
+
+    .stats { display: flex; gap: 16px; margin-bottom: 24px; }
+    .stats > a { flex: 1; }
+    .stat-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 18px 24px; flex: 1; }
+    .stat-card .label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .stat-card .value { font-size: 28px; font-weight: 700; color: #1e293b; }
+    .stat-card .sub   { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+    .stat-card.green .value { color: #16a34a; }
+    .stat-card.red   .value { color: #dc2626; }
+
+    form { display: flex; flex-direction: column; gap: 12px; }
+    label { font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 2px; display: block; }
+    input, select { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #1e293b; background: #f8fafc; transition: border 0.15s; }
+    input:focus, select:focus { border-color: #4f46e5; outline: none; background: #fff; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn { padding: 9px 20px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+    .btn-primary { background: #4f46e5; color: #fff; }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-success { background: #16a34a; color: #fff; }
+    .btn-success:hover { opacity: 0.88; }
+
+    .table-wrap { overflow-x: auto; margin-top: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #f1f5f9; color: #475569; font-weight: 600; text-align: left; padding: 10px 12px; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    tr:hover td { background: #f8fafc; }
+    .status-active  { color: #16a34a; font-weight: 600; }
+    .status-ended   { color: #94a3b8; font-weight: 600; }
+    .link-btn { color: #4f46e5; text-decoration: none; font-weight: 600; }
+    .link-btn:hover { text-decoration: underline; }
+
+    .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+    .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .alert-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; align-items:center; justify-content:center; }
+    .modal-overlay.active { display:flex; }
+    .modal-box { background:#fff; border-radius:12px; width:92%; max-width:860px; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 8px 32px rgba(0,0,0,0.18); }
+    .modal-header { padding:18px 24px; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between; }
+    .modal-header h3 { font-size:16px; font-weight:700; color:#1e293b; margin:0; }
+    .modal-close { background:none; border:none; font-size:22px; cursor:pointer; color:#64748b; line-height:1; padding:0 4px; }
+    .modal-body { overflow-y:auto; padding:0; }
+    .modal-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .modal-table th { background:#f8fafc; padding:10px 14px; text-align:left; font-weight:600; color:#475569; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; border-bottom:1px solid #e2e8f0; position:sticky; top:0; }
+    .modal-table td { padding:10px 14px; border-bottom:1px solid #f1f5f9; color:#334155; vertical-align:top; }
+    .modal-table tr:last-child td { border-bottom:none; }
+    .modal-table tr:hover td { background:#f8fafc; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:9999px; font-size:11px; font-weight:600; }
+    .badge-sent { background:#dcfce7; color:#16a34a; }
+    .badge-failed { background:#fee2e2; color:#dc2626; }
+    .modal-empty { text-align:center; padding:40px; color:#94a3b8; font-size:14px; }
+    .modal-loading { text-align:center; padding:40px; color:#94a3b8; }
+    .error-msg { font-size:11px; color:#dc2626; max-width:220px; word-break:break-word; }
+    .section-title { font-size: 16px; font-weight: 700; color: #1e293b; margin: 28px 0 16px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <h1>Skillfyme Admin Dashboard</h1>
+  <span class="badge {% if 'stopped' in scheduler_status %}warn{% endif %}">
+    Scheduler: {{ scheduler_status }}
+  </span>
+  <span style="font-size:12px; color:#c7d2fe;">{{ today }}</span>
+  <a href="/logout/" style="background:#ef4444; color:#fff; font-size:12px; font-weight:600; padding:6px 14px; border-radius:6px; text-decoration:none;">Logout</a>
+</nav>
+
+<div class="container">
+
+  {% if msg %}<div class="alert alert-success">✅ {{ msg }}</div>{% endif %}
+  {% if err %}<div class="alert alert-error">❌ {{ err }}</div>{% endif %}
+
+  <!-- Stats -->
+  <div class="stats">
+    <a href="/dashboard/email-logs/sent-today/" style="text-decoration:none; flex:1;">
+    <div class="stat-card green" style="cursor:pointer; transition:box-shadow 0.15s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(22,163,74,0.15)'" onmouseout="this.style.boxShadow=''">
+      <div class="label">Emails Sent Today</div>
+      <div class="value">{{ sent_today }}</div>
+      <div class="sub">class date = today · click to view</div>
+    </div>
+    </a>
+    <a href="/dashboard/email-logs/failed-today/" style="text-decoration:none; flex:1;">
+    <div class="stat-card red" style="cursor:pointer; transition:box-shadow 0.15s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(220,38,38,0.15)'" onmouseout="this.style.boxShadow=''">
+      <div class="label">Failed Today</div>
+      <div class="value">{{ failed_today }}</div>
+      <div class="sub">check logs for details · click to view</div>
+    </div>
+    </a>
+    <a href="/dashboard/email-logs/last-sent/" style="text-decoration:none; flex:1;">
+    <div class="stat-card" style="cursor:pointer; transition:box-shadow 0.15s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(79,70,229,0.15)'" onmouseout="this.style.boxShadow=''">
+      <div class="label">Last Email Sent</div>
+      <div class="value" style="font-size:16px;">
+        {% if last_sent_at %}{{ last_sent_at|time:"H:i" }} IST{% else %}—{% endif %}
+      </div>
+      <div class="sub">{% if last_sent_at %}{{ last_sent_at|date:"d M Y" }}{% endif %}</div>
+    </div>
+    </a>
+    <a href="/dashboard/batches/" style="text-decoration:none; flex:1;">
+    <div class="stat-card" style="cursor:pointer; transition:box-shadow 0.15s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(79,70,229,0.15)'" onmouseout="this.style.boxShadow=''">
+      <div class="label">Active Batches</div>
+      <div class="value">{{ active_batch_count }}</div>
+      <div class="sub">of {{ total_batch_count }} total</div>
+    </div>
+    </a>
+  </div>
+
+  <!-- Two-column: Create Batch + Upload CSV -->
+  <div class="grid-2">
+
+    <!-- Create Batch Form -->
+    <div class="card">
+      <h2>➕ Create New Batch</h2>
+      <form action="/api/batch/create/" method="post" onsubmit="return submitJson(event, this)">
+        {% csrf_token %}
+        <div>
+          <label>Batch Code</label>
+          <input name="batch_code" placeholder="#122506" required/>
+        </div>
+        <div>
+          <label>Product Title (must match CSV exactly)</label>
+          <input name="product_title" placeholder="#122506 - DevOps Cloud Certification" required/>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Class Days (comma-separated)</label>
+            <input name="class_days" placeholder="Mon,Wed,Fri" required/>
+          </div>
+          <div>
+            <label>Class Time (24hr IST)</label>
+            <input name="class_time" placeholder="19:00" required/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Batch Start Date</label>
+            <input name="batch_start_date" type="date" required/>
+          </div>
+          <div>
+            <label>Batch End Date</label>
+            <input name="batch_end_date" type="date" required/>
+          </div>
+        </div>
+        <div>
+          <label>Instructor Name</label>
+          <input name="instructor_name" placeholder="Amit Verma"/>
+          <label>Instructor Email</label>
+          <input name="instructor_email" type="email" placeholder="instructor@example.com"/>
+        </div>
+        <button class="btn btn-primary" type="submit">Create Batch</button>
+        <div id="batch-result" style="margin-top:8px; font-size:13px;"></div>
+      </form>
+    </div>
+
+    <!-- Upload CSV Form -->
+    <div class="card">
+      <h2>📤 Upload Learner Enrollments CSV</h2>
+      <p style="color:#64748b; font-size:13px; margin-bottom:16px;">
+        The CSV must have <strong>Learner Details</strong> and <strong>Product title</strong> columns.
+        Learners are matched to batches via product title. Existing learners for matched batches are replaced.
+      </p>
+      <form id="csv-form" enctype="multipart/form-data">
+        <div>
+          <label>CSV File</label>
+          <input type="file" id="csv-file" name="file" accept=".csv" required/>
+        </div>
+        <button class="btn btn-success" type="button" onclick="uploadCSV()">Upload &amp; Import</button>
+      </form>
+      <div id="csv-result" style="margin-top:16px; font-size:13px;"></div>
+    </div>
+
+  </div>
+
+  <!-- Batch Table -->
+  <div class="section-title" style="display:flex; align-items:center; gap:16px;">
+  📋 All Batches
+  <input id="batch-search" type="text" placeholder="Search by batch code…"
+    style="font-size:13px; padding:7px 12px; border:1px solid #cbd5e1; border-radius:6px; width:220px; background:#f8fafc;"
+    oninput="filterBatches(this.value)"/>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Batch Code</th>
+            <th>Product Title</th>
+            <th>Class Days</th>
+            <th>Time (IST)</th>
+            <th>Learners</th>
+            <th>End Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in batch_rows %}
+          <tr data-code="{{ b.batch_code|lower }}">
+            <td><strong>{{ b.batch_code }}</strong></td>
+            <td>{{ b.product_title }}</td>
+            <td>{{ b.class_days }}</td>
+            <td>{{ b.class_time }}</td>
+            <td>{{ b.learner_count }}</td>
+            <td>{{ b.batch_end_date }}</td>
+            <td>
+              {% if b.is_active %}
+                <span class="status-active">● Active</span>
+              {% else %}
+                <span class="status-ended">● Ended</span>
+              {% endif %}
+            </td>
+            <td>
+              <a class="link-btn" href="/dashboard/batch/{{ b.batch_code }}/">Manage →</a>
+              &nbsp;
+              <button
+                class="btn delete-btn"
+                style="background:#ef4444; color:#fff; padding:5px 12px; font-size:12px;"
+                data-code="{{ b.batch_code }}"
+                data-title="{{ b.product_title }}">
+                🗑 Remove
+              </button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8" style="text-align:center; color:#94a3b8; padding:24px;">No batches created yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  function filterBatches(query) {
+    const q = query.trim().toLowerCase();
+    document.querySelectorAll('tbody tr[data-code]').forEach(row => {
+      row.style.display = !q || row.dataset.code.includes(q) ? '' : 'none';
+    });
+  }
+
+  async function submitJson(e, form) {
+    e.preventDefault();
+    const resultEl = document.getElementById('batch-result');
+    const data = {};
+    new FormData(form).forEach((v, k) => { if (k !== 'csrfmiddlewaretoken') data[k] = v; });
+    resultEl.textContent = 'Creating…';
+    try {
+      const resp = await fetch('/api/batch/create/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify(data),
+      });
+      const json = await resp.json();
+      if (resp.ok) {
+        resultEl.style.color = '#16a34a';
+        resultEl.textContent = '✅ Batch created: ' + json.batch_code;
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        resultEl.style.color = '#dc2626';
+        resultEl.textContent = '❌ ' + (json.detail || JSON.stringify(json));
+      }
+    } catch (err) {
+      resultEl.style.color = '#dc2626';
+      resultEl.textContent = '❌ Network error: ' + err.message;
+    }
+    return false;
+  }
+
+  async function uploadCSV() {
+    const fileInput = document.getElementById('csv-file');
+    const resultEl = document.getElementById('csv-result');
+    if (!fileInput.files.length) { resultEl.textContent = 'Please select a file.'; return; }
+    const form = new FormData();
+    form.append('file', fileInput.files[0]);
+    resultEl.style.color = '#4f46e5';
+    resultEl.textContent = 'Uploading…';
+    try {
+      const resp = await fetch('/api/batch/upload-learners/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        body: form,
+      });
+      const json = await resp.json();
+      if (resp.ok) {
+        let html = `<strong style="color:#16a34a">✅ Import complete</strong><br/>
+          Total rows: ${json.total_rows} | Matched: ${json.matched_rows} | Skipped: ${json.skipped_rows}<br/>`;
+        if (Object.keys(json.learners_per_batch).length) {
+          html += '<br/><strong>Learners per batch:</strong><ul style="margin:6px 0 6px 18px;">';
+          for (const [bc, cnt] of Object.entries(json.learners_per_batch)) {
+            html += `<li>${bc}: ${cnt} learners</li>`;
+          }
+          html += '</ul>';
+        }
+        if (json.warnings.length) {
+          html += `<br/><strong style="color:#b45309;">⚠️ Warnings (${json.warnings.length}):</strong><ul style="margin:6px 0 6px 18px; color:#92400e;">`;
+          json.warnings.forEach(w => { html += `<li>${w}</li>`; });
+          html += '</ul>';
+        }
+        resultEl.innerHTML = html;
+        setTimeout(() => location.reload(), 3000);
+      } else {
+        resultEl.style.color = '#dc2626';
+        resultEl.textContent = '❌ ' + (json.detail || JSON.stringify(json));
+      }
+    } catch (err) {
+      resultEl.style.color = '#dc2626';
+      resultEl.textContent = '❌ Network error: ' + err.message;
+    }
+  }
+
+  async function deleteBatch(batchCode, title) {
+    const confirmed = confirm(
+      `⚠️ Are you sure you want to permanently delete batch:\n"${title}" (${batchCode})?\n\nThis will also delete all learners, cancellations, and email logs.`
+    );
+    if (!confirmed) return;
+    try {
+      const resp = await fetch(`/api/batch/${encodeURIComponent(batchCode)}/`, {
+        method: 'DELETE',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+      });
+      const json = await resp.json();
+      if (resp.ok) {
+        alert('✅ ' + json.detail);
+        location.reload();
+      } else {
+        alert('❌ ' + (json.detail || JSON.stringify(json)));
+      }
+    } catch (err) {
+      alert('❌ Network error: ' + err.message);
+    }
+  }
+
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.delete-btn');
+    if (!btn) return;
+    deleteBatch(btn.dataset.code, btn.dataset.title);
+  });
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
+</body>
+</html>

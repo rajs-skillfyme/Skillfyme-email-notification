@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — EdTech Email Reminder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --accent: #4f8ef7;
+      --accent-hover: #3a7aee;
+      --text: #e8eaf0;
+      --muted: #6b7280;
+      --error: #f87171;
+      --success: #34d399;
+      --input-bg: #12151f;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(79,142,247,0.12) 0%, transparent 60%);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      animation: slideUp 0.4s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    .logo-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+
+    .field {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.7rem 2.6rem 0.7rem 0.9rem;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+    }
+
+    input.error-input {
+      border-color: var(--error);
+    }
+
+    .toggle-pw {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 0;
+      line-height: 1;
+      font-size: 16px;
+      transition: color 0.15s;
+    }
+    .toggle-pw:hover { color: var(--text); }
+
+    .error-msg {
+      display: none;
+      font-size: 0.78rem;
+      color: var(--error);
+      margin-top: 0.4rem;
+    }
+
+    .flash {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .flash.flash-error   { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: var(--error); }
+    .flash.flash-success { background: rgba(52,211,153,0.1);  border: 1px solid rgba(52,211,153,0.3);  color: var(--success); }
+
+    .btn {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn:hover  { background: var(--accent-hover); }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">✉</div>
+    <span class="logo-text">EDTECH / ADMIN</span>
+  </div>
+
+  <h1>Sign in</h1>
+  <p class="subtitle">Access the email reminder dashboard</p>
+
+  {% if error %}
+  <div class="flash flash-error">⚠ {{ error }}</div>
+  {% endif %}
+  {% if success %}
+  <div class="flash flash-success">✓ {{ success }}</div>
+  {% endif %}
+
+  <form method="POST" action="/login/" id="loginForm" novalidate>
+    {% csrf_token %}
+
+    <div class="field">
+      <label for="username">Username</label>
+      <div class="input-wrap">
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="admin"
+          autocomplete="username"
+          required
+        />
+      </div>
+      <span class="error-msg" id="username-err">Username is required.</span>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <div class="input-wrap">
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="••••••••"
+          autocomplete="current-password"
+          required
+        />
+        <button type="button" class="toggle-pw" onclick="togglePw()" title="Show / hide password">
+          <span id="eyeIcon">👁</span>
+        </button>
+      </div>
+      <span class="error-msg" id="password-err">Password is required.</span>
+    </div>
+
+    <button class="btn" type="submit" id="submitBtn">Sign in</button>
+  </form>
+
+  <p class="footer-note">EdTech Email Reminder System v1.0</p>
+</div>
+
+<script>
+  function togglePw() {
+    const pw = document.getElementById('password');
+    const icon = document.getElementById('eyeIcon');
+    if (pw.type === 'password') {
+      pw.type = 'text';
+      icon.textContent = '🙈';
+    } else {
+      pw.type = 'password';
+      icon.textContent = '👁';
+    }
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    let valid = true;
+
+    const u = document.getElementById('username');
+    const p = document.getElementById('password');
+    const uErr = document.getElementById('username-err');
+    const pErr = document.getElementById('password-err');
+
+    u.classList.remove('error-input');
+    p.classList.remove('error-input');
+    uErr.style.display = 'none';
+    pErr.style.display = 'none';
+
+    if (!u.value.trim()) {
+      u.classList.add('error-input');
+      uErr.style.display = 'block';
+      valid = false;
+    }
+    if (!p.value.trim()) {
+      p.classList.add('error-input');
+      pErr.style.display = 'block';
+      valid = false;
+    }
+
+    if (!valid) {
+      e.preventDefault();
+      return;
+    }
+
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').textContent = 'Signing in…';
+  });
+</script>
+
+</body>
+</html>

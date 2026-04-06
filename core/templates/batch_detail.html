@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Batch: {{ batch.batch_code }} — Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f5f9; color: #1e293b; font-size: 14px; }
+    nav { background: #4f46e5; color: #fff; padding: 0 32px; display: flex; align-items: center; height: 56px; gap: 16px; }
+    nav h1 { font-size: 17px; font-weight: 700; flex: 1; }
+    nav a  { color: #c7d2fe; text-decoration: none; font-size: 13px; }
+    nav a:hover { color: #fff; }
+    .container { max-width: 900px; margin: 0 auto; padding: 28px 24px; }
+    .card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 24px; }
+    .card h2 { font-size: 15px; font-weight: 700; color: #4f46e5; margin-bottom: 18px; border-bottom: 2px solid #e0e7ff; padding-bottom: 10px; }
+    .meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .meta-item .label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .meta-item .value { font-size: 14px; font-weight: 600; color: #1e293b; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #f1f5f9; color: #475569; font-weight: 600; text-align: left; padding: 10px 12px; border-bottom: 2px solid #e2e8f0; }
+    td { padding: 12px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    tr:hover td { background: #f8fafc; }
+    .btn { padding: 7px 16px; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+    .btn-danger  { background: #ef4444; color: #fff; }
+    .btn-danger:hover { opacity: 0.85; }
+    .btn-success { background: #16a34a; color: #fff; }
+    .btn-success:hover { opacity: 0.85; }
+    .cancelled-row td { background: #fef2f2 !important; color: #991b1b; }
+    .cancelled-badge { background: #fee2e2; color: #991b1b; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-left: 8px; }
+    .active-badge    { background: #dcfce7; color: #166534; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-left: 8px; }
+    .postponed-badge { background: #fef9c3; color: #854d0e; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-left: 8px; }
+    .btn-warning { background: #f59e0b; color: #fff; }
+    .btn-warning:hover { opacity: 0.85; }
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:100; align-items:center; justify-content:center; }
+    .overlay.open { display:flex; }
+    .modal { background:#fff; border-radius:12px; padding:28px 28px 24px; width:420px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,0.18); }
+    .modal h3 { font-size:16px; color:#b45309; margin-bottom:16px; }
+    .modal label { font-size:12px; font-weight:600; color:#475569; display:block; margin-bottom:4px; margin-top:12px; }
+    .modal input, .modal textarea { width:100%; padding:8px 10px; border:1px solid #e2e8f0; border-radius:6px; font-size:13px; }
+    .modal-btns { display:flex; gap:10px; margin-top:20px; justify-content:flex-end; }
+    .msg { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+    .msg.ok  { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .msg.err { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    #flash-msg { display: none; }
+    .empty { text-align: center; color: #94a3b8; padding: 24px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <h1>📋 Batch: {{ batch.batch_code }}</h1>
+  <a href="/dashboard/">← Back to Dashboard</a>
+</nav>
+
+<div class="container">
+  <div id="flash-msg" class="msg"></div>
+
+  <!-- Batch Info Card -->
+  <div class="card">
+    <h2>Batch Information</h2>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="label">Batch Code</div>
+        <div class="value">{{ batch.batch_code }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Product Title</div>
+        <div class="value">{{ batch.product_title }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Instructor</div>
+        <div class="value">{{ batch.instructor_name }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Class Days</div>
+        <div class="value">{{ batch.class_days }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Class Time</div>
+        <div class="value">{{ batch.class_time }} IST</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Enrolled Learners</div>
+        <div class="value">{{ learner_count }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Start Date</div>
+        <div class="value">{{ batch.batch_start_date }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">End Date</div>
+        <div class="value">{{ batch.batch_end_date }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upcoming Classes Card -->
+  <div class="card">
+    <h2>📅 Upcoming Classes (Next 14 Days)</h2>
+    {% if class_rows %}
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in class_rows %}
+        {# Store the ISO date safely in a data attribute — no quoting conflict #}
+        <tr class="{% if row.is_cancelled %}cancelled-row{% endif %}"
+            id="row-{{ row.date|date:'Y-m-d' }}"
+            data-date="{{ row.date|date:'Y-m-d' }}"
+            data-batch="{{ batch.batch_code }}">
+          <td>
+            <strong>{{ row.date_str }}</strong>
+            {% if row.is_cancelled %}
+              <span class="cancelled-badge">CANCELLED</span>
+            {% elif row.is_postponed %}
+              <span class="postponed-badge">POSTPONED</span>
+            {% else %}
+              <span class="active-badge">SCHEDULED</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if row.is_cancelled %}
+              <span style="color:#991b1b;">Emails will NOT be sent</span>
+            {% elif row.is_postponed %}
+              <span style="color:#b45309;">Rescheduled → {{ row.new_date_str }} {{ row.new_time }}</span>
+            {% else %}
+              <span style="color:#166534;">Emails will be sent 1 hr before</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if row.is_cancelled %}
+              <button class="btn btn-success" onclick="undoCancel(this)">
+                ↩ Undo Cancel
+              </button>
+              <button class="btn"
+                      style="background:#ef4444; color:#fff;"
+                      onclick="deleteBatch(this)">
+                🗑 Delete This Course
+              </button>
+            {% elif row.is_postponed %}
+              <span style="color:#b45309;font-size:12px;">Already postponed</span>
+            {% else %}
+              <button class="btn btn-danger" onclick="cancelClass(this)">
+                ✕ Cancel Class
+              </button>
+              <button class="btn btn-warning"
+                      style="margin-left:6px;"
+                      onclick="openPostponeModal(this)">
+                ⏸ Postpone
+              </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="empty">No upcoming classes in the next 14 days.</p>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- Postpone Modal -->
+<div class="overlay" id="postpone-overlay">
+  <div class="modal">
+    <h3>⏸ Postpone Class</h3>
+    <input type="hidden" id="p-batch-code">
+    <input type="hidden" id="p-original-date">
+
+    <label>Original Date</label>
+    <input type="text" id="p-original-date-display" disabled>
+
+    <label>New Date</label>
+    <input type="date" id="p-new-date" required>
+
+    <label>New Time (IST, 24h format e.g. 19:00)</label>
+    <input type="time" id="p-new-time" required>
+
+    <label>Reason (optional)</label>
+    <textarea id="p-reason" rows="2" placeholder="e.g. Instructor unavailable"></textarea>
+
+    <div class="modal-btns">
+      <button class="btn" style="background:#e2e8f0;color:#475569;" onclick="closePostponeModal()">Cancel</button>
+      <button class="btn btn-warning" onclick="submitPostpone()">Send Postponement Email</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function getRowData(btn) {
+    const row = btn.closest('tr');
+    return {
+      date: row.dataset.date,
+      batchCode: row.dataset.batch,
+    };
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  function showFlash(message, isError) {
+    const el = document.getElementById('flash-msg');
+    el.textContent = (isError ? '❌ ' : '✅ ') + message;
+    el.className = 'msg ' + (isError ? 'err' : 'ok');
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 4000);
+  }
+
+  async function cancelClass(btn) {
+    const { date, batchCode } = getRowData(btn);
+    btn.disabled = true;
+    btn.textContent = 'Cancelling…';
+    try {
+      const resp = await fetch(`/api/batch/${encodeURIComponent(batchCode)}/cancel-class/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ date: date }),
+      });
+      const json = await resp.json();
+      if (resp.ok || resp.status === 201) {
+        showFlash(`Class on ${date} cancelled. Cancellation email will be sent per timing rules.`, false);
+        setTimeout(() => location.reload(), 1200);
+      } else {
+        showFlash(json.detail || 'Cancel failed.', true);
+        btn.disabled = false;
+        btn.textContent = '✕ Cancel Class';
+      }
+    } catch (err) {
+      showFlash('Network error: ' + err.message, true);
+      btn.disabled = false;
+      btn.textContent = '✕ Cancel Class';
+    }
+  }
+
+  async function undoCancel(btn) {
+    const { date, batchCode } = getRowData(btn);
+    btn.disabled = true;
+    btn.textContent = 'Undoing…';
+    try {
+      const resp = await fetch(`/api/batch/${encodeURIComponent(batchCode)}/cancel-class/`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ date: date }),
+      });
+      const json = await resp.json();
+      if (resp.ok) {
+        showFlash(`Cancellation for ${date} undone.`, false);
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        showFlash(json.detail || 'Undo failed.', true);
+        btn.disabled = false;
+        btn.textContent = '↩ Undo Cancel';
+      }
+    } catch (err) {
+      showFlash('Network error: ' + err.message, true);
+      btn.disabled = false;
+      btn.textContent = '↩ Undo Cancel';
+    }
+  }
+
+  async function deleteBatch(btn) {
+    const { batchCode } = getRowData(btn);
+    const title = document.querySelector('.meta-item .value')?.textContent || batchCode;
+    const confirmed = confirm(
+      `⚠️ Permanently delete "${title}" (${batchCode})?\nAll learners, cancellations, and email logs will be removed.`
+    );
+    if (!confirmed) return;
+    const resp = await fetch(`/api/batch/${encodeURIComponent(batchCode)}/`, {
+      method: 'DELETE',
+      headers: { 'X-CSRFToken': getCookie('csrftoken') },
+    });
+    const json = await resp.json();
+    if (resp.ok) {
+      alert('✅ Deleted successfully.');
+      window.location.href = '/dashboard/';
+    } else {
+      alert('❌ ' + (json.detail || JSON.stringify(json)));
+    }
+  }
+
+  function openPostponeModal(btn) {
+    const { date, batchCode } = getRowData(btn);
+    document.getElementById('p-batch-code').value = batchCode;
+    document.getElementById('p-original-date').value = date;
+    document.getElementById('p-original-date-display').value = date;
+    document.getElementById('p-new-date').value = '';
+    document.getElementById('p-new-time').value = '';
+    document.getElementById('p-reason').value = '';
+    document.getElementById('postpone-overlay').classList.add('open');
+  }
+
+  function closePostponeModal() {
+    document.getElementById('postpone-overlay').classList.remove('open');
+  }
+
+  async function submitPostpone() {
+    const batchCode = document.getElementById('p-batch-code').value;
+    const originalDate = document.getElementById('p-original-date').value;
+    const newDate = document.getElementById('p-new-date').value;
+    const newTime = document.getElementById('p-new-time').value;
+    const reason = document.getElementById('p-reason').value;
+
+    if (!newDate || !newTime) {
+      alert('Please fill in the new date and new time.');
+      return;
+    }
+
+    const submitBtn = document.querySelector('#postpone-overlay .btn-warning');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+
+    try {
+      const resp = await fetch(`/api/batch/${encodeURIComponent(batchCode)}/postpone-class/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({
+          original_date: originalDate,
+          new_date: newDate,
+          new_time: newTime,
+          reason: reason || null,
+        }),
+      });
+      const json = await resp.json();
+      if (resp.ok || resp.status === 201) {
+        closePostponeModal();
+        showFlash(`Class postponed to ${newDate} ${newTime}. Emails are being sent to learners.`, false);
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        alert('❌ ' + (json.detail || JSON.stringify(json)));
+      }
+    } catch (err) {
+      alert('Network error: ' + err.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send Postponement Email';
+    }
+  }
+</script>
+</body>
+</html>

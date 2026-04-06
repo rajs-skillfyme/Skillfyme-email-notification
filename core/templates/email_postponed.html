@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class Rescheduled – Skillfyme</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f0eb;font-family:Poppins,Arial,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f0eb;padding:20px 0;">
+<tr><td align="center">
+
+<table width="640" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;">
+
+<!-- TOP BAR -->
+<tr>
+<td style="background:#496592;padding:20px;text-align:center;">
+<img src="https://cdn.jsdelivr.net/gh/Skillfyme-R/Skillfyme_logo@main/Meta_Creatives-Part-1%20(8).png"
+     alt="Skillfyme Logo" width="260"
+     style="display:block;margin:auto;max-width:100%;height:auto;">
+</td>
+</tr>
+
+<!-- HERO -->
+<tr>
+<td style="background:#fffbeb;padding:35px 30px;text-align:center;">
+<div style="color:#b45309;font-size:12px;font-weight:700;letter-spacing:2px;margin-bottom:10px;">
+CLASS RESCHEDULED
+</div>
+<div style="font-size:26px;font-weight:700;color:#1a1a2e;line-height:1.4;">
+{{ product_title | safe }}
+</div>
+</td>
+</tr>
+
+<!-- CONTENT -->
+<tr>
+<td style="padding:30px 35px;color:#333;font-size:14px;line-height:1.7;">
+<p style="margin:0 0 10px;"><strong>Dear {{ learner_name | safe }},</strong></p>
+
+<p style="margin:0 0 20px;">
+We want to inform you that your
+<strong style="color:#496592;">{{ product_title | safe }}</strong> class
+has been <strong>rescheduled</strong>.
+</p>
+
+<!-- Schedule change box -->
+<table width="100%" cellpadding="0" cellspacing="0"
+       style="border:1px solid #fde68a;border-radius:10px;overflow:hidden;margin-bottom:24px;">
+<tr>
+<td style="background:#fef3c7;padding:16px 20px;">
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td width="50%" style="padding:8px 0;">
+  <p style="margin:0;font-size:11px;color:#92400e;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;">Previously Scheduled</p>
+  <p style="margin:4px 0 0;font-size:14px;font-weight:600;color:#1a1a2e;text-decoration:line-through;color:#9ca3af;">
+    {{ original_date }}
+  </p>
+</td>
+<td width="50%" style="padding:8px 0;">
+  <p style="margin:0;font-size:11px;color:#065f46;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;">New Schedule</p>
+  <p style="margin:4px 0 0;font-size:15px;font-weight:700;color:#065f46;">
+    {{ new_date }}
+  </p>
+  <p style="margin:2px 0 0;font-size:13px;color:#065f46;">
+    at {{ new_time }} IST
+  </p>
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+</table>
+
+<p style="margin:0 0 20px;">
+Please update your calendar accordingly. The class will be held on the same platform — just join at the new time.
+</p>
+
+<p style="margin:0 0 10px;">
+For any questions, reach out at
+<a href="mailto:support@skillfyme.com" style="color:#496592;">support@skillfyme.com</a>.
+</p>
+</td>
+</tr>
+
+<!-- BATCH INFO -->
+<tr>
+<td style="padding:20px 35px;border-top:1px solid #eee;font-size:14px;">
+<p style="margin:0 0 5px;"><strong>Batch Code:</strong> {{ batch_code }}</p>
+<p style="margin:0;"><strong>Instructor:</strong> {{ instructor_name | safe }}</p>
+</td>
+</tr>
+
+<!-- FOOTER -->
+<tr>
+<td style="padding:25px 35px;border-top:1px solid #eee;">
+<table width="100%"><tr>
+<td>
+<p style="margin:0;font-weight:700;">Support</p>
+<a href="mailto:support@skillfyme.com" style="color:#496592;text-decoration:none;font-size:13px;">support@skillfyme.com</a>
+</td>
+<td align="right">
+<p style="margin:0 0 8px;font-size:13px;color:#888;">Follow us on</p>
+<table cellpadding="0" cellspacing="0" border="0"><tr>
+<td style="padding-left:6px;">
+  <a href="https://www.linkedin.com/company/skillfyme-in/" target="_blank">
+    <img src="https://cdn-icons-png.flaticon.com/512/3536/3536505.png" alt="LinkedIn" width="28" height="28" style="display:block;border:0;">
+  </a>
+</td>
+<td style="padding-left:6px;">
+  <a href="https://www.instagram.com/skillfyme" target="_blank">
+    <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram" width="28" height="28" style="display:block;border:0;">
+  </a>
+</td>
+<td style="padding-left:6px;">
+  <a href="https://www.youtube.com/@Skillfyme" target="_blank">
+    <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube" width="28" height="28" style="display:block;border:0;">
+  </a>
+</td>
+</tr></table>
+</td>
+</tr>
+<tr><td colspan="2" style="height:6px;background:#b45309;"></td></tr>
+</table>
+</td>
+</tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ page_title }} — Skillfyme</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f5f9; color: #1e293b; font-size: 14px; }
+    nav { background: #4f46e5; color: #fff; padding: 0 32px; display: flex; align-items: center; height: 56px; gap: 16px; }
+    nav h1 { font-size: 18px; font-weight: 700; flex: 1; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+    .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; font-weight: 600; color: #4f46e5; text-decoration: none; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .back-btn:hover { background: #f1f5f9; }
+    .page-header h2 { font-size: 20px; font-weight: 700; color: #1e293b; flex: 1; }
+    .count-badge { font-size: 13px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+    .badge-sent   { background: #dcfce7; color: #16a34a; }
+    .badge-failed { background: #fee2e2; color: #dc2626; }
+    .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+    .search-bar input { flex: 1; max-width: 380px; padding: 9px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: #fff; outline: none; }
+    .search-bar input:focus { border-color: #4f46e5; }
+    .search-bar button { padding: 9px 20px; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .search-bar button:hover { background: #3730a3; }
+    .card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #f8fafc; padding: 11px 14px; text-align: left; font-weight: 600; color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+    td { padding: 11px 14px; border-bottom: 1px solid #f1f5f9; color: #334155; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+    .empty { text-align: center; padding: 48px; color: #94a3b8; font-size: 14px; }
+    .error-msg { font-size: 12px; color: #dc2626; max-width: 260px; word-break: break-word; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <h1>Skillfyme Admin Dashboard</h1>
+  <span style="font-size:12px; color:#c7d2fe;">{{ today }}</span>
+  <a href="/logout/" style="background:#ef4444; color:#fff; font-size:12px; font-weight:600; padding:6px 14px; border-radius:6px; text-decoration:none;">Logout</a>
+</nav>
+
+<div class="container">
+
+  <div class="page-header">
+    <a class="back-btn" href="/dashboard/">← Back to Dashboard</a>
+    <h2>{{ page_title }}</h2>
+    <span class="count-badge badge-{{ mode }}">{{ log_count }} record{{ log_plural }}</span>
+  </div>
+
+  <form class="search-bar" method="get" action="/dashboard/email-logs/{{ mode }}-today/">
+    <input
+      type="text"
+      name="search"
+      value="{{ search }}"
+      placeholder="Search by email or batch code…"
+    />
+    <button type="submit">Search</button>
+  </form>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Email</th>
+            <th>Batch</th>
+            <th>Class Date</th>
+            <th>Status</th>
+            <th>Sent At (IST)</th>
+            <th>Attempts</th>
+            <th>{% if mode == 'failed' %}Failure Reason{% else %}Notes{% endif %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+          <tr>
+            <td style="color:#94a3b8">{{ forloop.counter }}</td>
+            <td>{{ log.learner_email }}</td>
+            <td>{{ log.batch_id }}</td>
+            <td>{{ log.class_date }}</td>
+            <td>
+              {% if log.status == 'sent' %}
+                <span class="badge badge-sent">sent</span>
+              {% else %}
+                <span class="badge badge-failed">{{ log.status }}</span>
+              {% endif %}
+            </td>
+            <td style="white-space:nowrap;">
+              {% if log.sent_at %}{{ log.sent_at|date:"d M Y, H:i" }} IST{% else %}—{% endif %}
+            </td>
+            <td style="text-align:center;">{{ log.attempt_count }}</td>
+            <td>
+              {% if log.error_message %}
+                <span class="error-msg">{{ log.error_message }}</span>
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8" class="empty">No records found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
