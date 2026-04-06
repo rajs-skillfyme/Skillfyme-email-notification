@@ -15,3 +15,4 @@ jinja2>=3.1
 python-multipart>=0.0.9
 gunicorn>=21.0
 psycopg2-binary>=2.9   
+django-apscheduler>=0.6
