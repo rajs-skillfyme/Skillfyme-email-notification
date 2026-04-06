@@ -181,3 +181,5 @@ LOGGING = {
         'level': LOG_LEVEL,
     },
 }
+SESSION_COOKIE_AGE = int(env('SESSION_COOKIE_AGE', default='86400'))
+SESSION_SAVE_EVERY_REQUEST = True
