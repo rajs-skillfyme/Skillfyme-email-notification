@@ -18,3 +18,4 @@ psycopg2-binary>=2.9
 django-apscheduler>=0.6
 bcrypt==4.0.1
 SQLAlchemy>=2.0
+dj-database-url

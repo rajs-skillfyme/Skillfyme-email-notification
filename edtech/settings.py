@@ -75,24 +75,26 @@ WSGI_APPLICATION = 'edtech.wsgi.application'
 # Database (SQLite with WAL mode + FK enforcement)
 # ---------------------------------------------------------------------------
 
+import dj_database_url
+
 DATABASE_URL = env('DATABASE_URL', default='sqlite:///data/edtech.db')
-# Parse path from sqlite:///data/edtech.db
-_db_path = DATABASE_URL.replace('sqlite:///', '')
-if not os.path.isabs(_db_path):
-    _db_path = str(BASE_DIR / _db_path)
 
-# Ensure directory exists
-os.makedirs(os.path.dirname(_db_path), exist_ok=True)
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': _db_path,
-        'OPTIONS': {
-            'timeout': 20,
-            # SQLite does not support init_command — removed
-        },
+if DATABASE_URL.startswith('postgresql'):
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
+else:
+    _db_path = DATABASE_URL.replace('sqlite:///', '')
+    if not os.path.isabs(_db_path):
+        _db_path = str(BASE_DIR / _db_path)
+    os.makedirs(os.path.dirname(_db_path), exist_ok=True)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': _db_path,
+            'OPTIONS': {'timeout': 20},
+        }
+    
 }
 # ---------------------------------------------------------------------------
 # Sessions
