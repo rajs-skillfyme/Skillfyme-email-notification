@@ -12,33 +12,38 @@ Key invariants preserved:
   - Jobs firing in background threads open their own DB connection and
     close it in a finally block (Django ORM thread-safety)
   - reschedule_all_batches() queries batch_end_date >= today
+
+FIX: The broken duplicate definition of reschedule_all_batches() at the bottom
+     of the file has been removed. There is now exactly ONE definition which
+     correctly handles OperationalError/ProgrammingError (DB not ready on startup).
 """
 
 from __future__ import annotations
 
 import logging
+import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
-from core.models import Batch
+
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.date import DateTrigger
 from django.conf import settings
+from django.db import OperationalError, ProgrammingError
 
 logger = logging.getLogger(__name__)
 _IST = ZoneInfo(settings.APP_TIMEZONE)
 
 # Module-level singleton — created once, shared everywhere
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-import os
-
 _db_url = os.environ.get('DATABASE_URL', '').replace('postgresql://', 'postgresql+psycopg2://')
 
 scheduler = BackgroundScheduler(
     jobstores={'default': SQLAlchemyJobStore(url=_db_url)},
     timezone=settings.APP_TIMEZONE,
 )
+
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
@@ -217,6 +222,12 @@ def reschedule_all_batches() -> None:
     """
     On application startup: query all active batches and rebuild all jobs.
     'Active' means batch_end_date >= today.
+
+    FIX: There was a broken duplicate definition of this function at the bottom
+    of the original file. Python always uses the LAST definition, so the correct
+    logic here was being silently replaced by a broken stub that did nothing.
+    Now there is exactly ONE definition. It also safely handles OperationalError
+    and ProgrammingError in case DB tables are not ready yet (e.g. first deploy).
     """
     import django.db
     django.db.close_old_connections()
@@ -227,6 +238,9 @@ def reschedule_all_batches() -> None:
         logger.info('Rescheduling jobs for %d active batches on startup.', len(active_batches))
         for batch in active_batches:
             schedule_batch_jobs(batch)
+    except (OperationalError, ProgrammingError) as e:
+        # DB tables not ready yet (e.g. during first migrate) — skip silently
+        logger.warning('reschedule_all_batches skipped — DB tables not ready: %s', e)
     except Exception:
         logger.exception('Error in reschedule_all_batches')
     finally:
@@ -239,19 +253,3 @@ def get_scheduler_status() -> str:
         job_count = len(scheduler.get_jobs())
         return f'running ({job_count} jobs)'
     return 'stopped'
-
-# core/services/scheduler_service.py
-
-from django.db import OperationalError, ProgrammingError
-
-def reschedule_all_batches():
-    try:
-        today = date.today()
-        active_batches = list(Batch.objects.filter(batch_end_date__gte=today))
-        # ... rest of your logic
-    except (OperationalError, ProgrammingError) as e:
-        # Table doesn't exist yet (e.g. during first migrate), skip silently
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.warning("reschedule_all_batches skipped — DB tables not ready: %s", e)
-        return
