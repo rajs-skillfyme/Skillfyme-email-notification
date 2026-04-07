@@ -49,7 +49,7 @@ class Command(BaseCommand):
                 logger.info('Sending chunk %d (%d learners) for batch %s — %d min before class.', chunk_index + 1, len(chunk), batch.batch_code, minutes_before)
                 for idx, learner in enumerate(chunk):
                     try:
-                        send_email_with_retry(batch_code=batch.batch_code, learner_email=learner.email, learner_name=learner.learner_name, product_title=batch.product_title, class_date=today, class_time=batch.class_time, instructor_name=batch.instructor_name)
+                        send_email_with_retry(batch_code=batch.batch_code, learner_email=learner.email, learner_name=learner.learner_name, product_title=batch.product_title, class_date=today, class_time=batch.class_time, instructor_name=batch.instructor_name, hours_before=minutes_before // 60)
                     except Exception as exc:
                         logger.error('Email failed for %s: %s', learner.email, exc)
                     if idx < len(chunk) - 1:

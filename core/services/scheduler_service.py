@@ -60,7 +60,7 @@ def _send_chunk_emails(batch_code, class_date_iso, chunk_index):
         logger.info('Sending chunk %d/%d (%d learners) for batch %s (class: %s).', chunk_index + 1, len(chunks), len(chunk), batch_code, class_date)
         for idx, learner in enumerate(chunk):
             try:
-                send_email_with_retry(batch_code=batch_code, learner_email=learner.email, learner_name=learner.learner_name, product_title=batch.product_title, class_date=class_date, class_time=batch.class_time, instructor_name=batch.instructor_name)
+                send_email_with_retry(batch_code=batch_code, learner_email=learner.email, learner_name=learner.learner_name, product_title=batch.product_title, class_date=class_date, class_time=batch.class_time, instructor_name=batch.instructor_name, hours_before=_CHUNK_HOURS[chunk_index])
             except Exception as exc:
                 logger.error('Email failed for %s in batch %s: %s', learner.email, batch_code, exc)
             if idx < len(chunk) - 1:
