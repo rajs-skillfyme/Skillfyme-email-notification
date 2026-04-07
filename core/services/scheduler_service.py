@@ -30,8 +30,15 @@ logger = logging.getLogger(__name__)
 _IST = ZoneInfo(settings.APP_TIMEZONE)
 
 # Module-level singleton — created once, shared everywhere
-scheduler = BackgroundScheduler(timezone=settings.APP_TIMEZONE)
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+import os
 
+_db_url = os.environ.get('DATABASE_URL', '').replace('postgresql://', 'postgresql+psycopg2://')
+
+scheduler = BackgroundScheduler(
+    jobstores={'default': SQLAlchemyJobStore(url=_db_url)},
+    timezone=settings.APP_TIMEZONE,
+)
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
