@@ -13,6 +13,9 @@ Preserved exactly:
   - mark_cancelled: only transitions if status != 'sent'
   - All 6 subject line strings match exactly
   - SMTP sequence: ehlo → starttls → ehlo → login → sendmail, timeout=30
+
+FIX: _send_via_smtp now uses SMTP (port 587) + STARTTLS instead of SMTP_SSL (port 465).
+     The env var SMTP_PORT=587 is now correctly respected.
 """
 
 from __future__ import annotations
@@ -77,6 +80,7 @@ def _create_or_get_log(
 
 # ---------------------------------------------------------------------------
 # Internal: SMTP send
+# FIX: Use SMTP + STARTTLS on port 587 (was wrongly using SMTP_SSL on port 465)
 # ---------------------------------------------------------------------------
 
 def _send_via_smtp(
@@ -92,7 +96,11 @@ def _send_via_smtp(
     msg['To'] = f'{to_name} <{to_email}>'
     msg.attach(MIMEText(html_body, 'html', 'utf-8'))
 
-    with smtplib.SMTP_SSL(settings.SMTP_HOST, 465, timeout=30) as server:
+    # FIXED: Use SMTP with STARTTLS on port 587 (matches SMTP_PORT=587 in .env)
+    # The old code used SMTP_SSL on hardcoded port 465 which ignored SMTP_PORT entirely.
+    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=30) as server:
+        server.ehlo()
+        server.starttls()
         server.ehlo()
         server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
         server.sendmail(settings.SENDER_EMAIL, [to_email], msg.as_string())

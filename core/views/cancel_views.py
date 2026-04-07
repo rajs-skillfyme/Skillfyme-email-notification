@@ -13,6 +13,11 @@ CRITICAL logic preserved:
   Postponement emails always fire immediately (no 24h branch).
 
 All thread functions open their own DB connections (Django ORM thread safety).
+
+FIX: After saving a postponement, schedule_batch_jobs(batch) is now called so
+     that APScheduler registers a 1-hour-before reminder for the new class date.
+     Previously the postponement notification email was sent immediately but no
+     reminder job was ever created for the rescheduled class.
 """
 
 import logging
@@ -268,6 +273,11 @@ def postpone_class_view(request, batch_code):
     """
     Postpone a specific class to a new date and time.
     Fires postponement emails immediately (no 24h branch).
+
+    FIX: After saving the postponement, schedule_batch_jobs(batch) is called so
+         that a 1-hour-before reminder job is registered for the new class date.
+         Without this, learners would receive the postponement notification but
+         never receive the reminder email for the rescheduled class.
     """
     batch = _require_batch(batch_code)
     if batch is None:
@@ -297,7 +307,17 @@ def postpone_class_view(request, batch_code):
         batch_code, payload['original_date'], payload['new_date'], payload['new_time'],
     )
 
-    # Fire postponement emails immediately in background
+    # FIX: Reschedule reminder jobs for this batch so the new date gets a
+    #      1-hour-before reminder. schedule_batch_jobs uses replace_existing=True
+    #      so existing jobs are safely updated and duplicates are not created.
+    try:
+        from core.services.scheduler_service import schedule_batch_jobs
+        schedule_batch_jobs(batch)
+        logger.info('Rescheduled reminder jobs for batch %s after postponement.', batch_code)
+    except Exception:
+        logger.exception('Failed to reschedule jobs for batch %s after postponement.', batch_code)
+
+    # Fire postponement notification emails immediately in background
     threading.Thread(
         target=_send_postponement_emails_now,
         args=(
