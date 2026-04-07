@@ -49,7 +49,7 @@ def _send_batch_emails(batch_code, class_date_iso):
         logger.info('Sending %d reminder emails for batch %s (class date: %s).', len(learners), batch_code, class_date)
         def _send_one(learner):
             send_email_with_retry(batch_code=batch_code, learner_email=learner.email, learner_name=learner.learner_name, product_title=batch.product_title, class_date=class_date, class_time=batch.class_time, instructor_name=batch.instructor_name)
-        with ThreadPoolExecutor(max_workers=10) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             futures = [executor.submit(_send_one, l) for l in learners]
             for future in as_completed(futures):
                 try:
