@@ -80,7 +80,7 @@ def schedule_batch_jobs(batch):
                 trigger_dt = now_ist + timedelta(seconds=5)
             else:
                 continue
-        scheduler.add_job(_send_batch_emails, trigger=DateTrigger(run_date=trigger_dt), id=_job_id(batch.batch_code, class_date), name=f'Reminder: {batch.batch_code} on {class_date}', args=[batch.batch_code, class_date.isoformat()], misfire_grace_time=600, replace_existing=True)
+        scheduler.add_job(_send_batch_emails, trigger=DateTrigger(run_date=trigger_dt), id=_job_id(batch.batch_code, class_date), name=f'Reminder: {batch.batch_code} on {class_date}', args=[batch.batch_code, class_date.isoformat()], misfire_grace_time=3600, replace_existing=True)
         added += 1
     logger.info('Scheduled %d jobs for batch %s.', added, batch.batch_code)
     return added
